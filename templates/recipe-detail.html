@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ recipe.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+</head>
+<body>
+    <header>
+        <h1>{{ recipe.title }}</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('recipes') }}">Back to Recipes</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="image-and-details-container">
+            <img class="detail-img" src="/image/{{ recipe.id }}" alt="Recipe Image" style="max-width: 100%; height: auto;">
+            <section class="transparent-background">
+                <div class="recipe-details">
+                    <span>Serves: {{ recipe.yields }}</span>
+                    <span>Prep Time (min): {{ recipe.prep_time }}</span>
+                    <span>Cook Time (min): {{ recipe.cook_time }}</span>
+                </div>
+            </section>
+        </div>
+        <section class="transparent-background">
+            <h2>Ingredients:</h2>
+            <ul>
+                {% for ingredient in ingredients %}
+                <li>{{ ingredient }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section class="transparent-background">
+            <h2>Instructions:</h2>
+            <p class="preserve-breaks">{{ recipe.instructions }}</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 My Recipe Collection</p>
+    </footer>
+</body>
+</html>

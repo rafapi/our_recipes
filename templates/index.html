@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Recipe Collection</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <header>
+        <h1>Our Recipe Collection</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('recipes') }}">Recipes</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <!-- <div class="about-section" style="background-image: url('https://images.pexels.com/photos/1435895/pexels-photo-1435895.jpeg?auto=compress&cs=tinysrgb&h=650&w=940'); background-size: cover; background-position: center; padding: 200px 0;"> -->
+            <!-- <div class="about-section" style="background-image: url('{{ url_for('static', filename='images/galician_irish.png') }}'); background-size: cover; background-position: center; padding: 200px 0;"> -->
+                <div class="content" style="background-color: rgba(255, 255, 255, 0.8); margin: 0 auto; max-width: 1200px; padding: 20px;">
+                    <h2>About this Site</h2>
+                    <p>Welcome to "Our Favorite Recipes." In this special space, my wife and I share a curated blend of dishes that have touched our lives – some are direct treasures from various public sources, presented in their original form, while others have been gently adapted in our kitchen. Our journey through these recipes is guided by a simple yet profound goal: to enhance our health and enrich our lives through the benefits of good and healthy nutrition. Each recipe, whether unaltered or personalized, is chosen for its wholesome goodness and the joy it brings to our table. This collection is more than just about cooking; it's about nurturing well-being and savoring the flavors that contribute to a healthier lifestyle.</p>
+                    <!-- Photo by Engin Akyurt from Pexels -->
+                </div>
+            <!-- </div> -->
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 My Recipe Collection</p>
+    </footer>
+</body>
+</html>

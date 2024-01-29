@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}"><link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Our Favorite Recipes</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('home') }}">Home</a></li>
+                <li><a href="{{ url_for('recipes') }}">Recipes</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section>
+            <form id="recipeForm">
+                <input type="text" id="recipeUrl" placeholder="Enter recipe URL">
+                <button type="submit">Get Recipe</button>
+            </form>
+        </section>
+
+        <section id="recipeDisplay" class="grid-container">
+            <!-- Recipe cards will be displayed here -->
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 My Recipe Collection</p>
+    </footer>
+</body>
+</html>
