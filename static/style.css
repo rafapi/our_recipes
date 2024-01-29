@@ -1,0 +1,238 @@
+/* Apply a subtle background color to the entire page */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f7f7f7;
+    color: #040101; /* Dark grey color for text */
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/static/images/kitchen_background.png');
+    background-size: cover;
+    background-attachment: fixed; /* Keep the background fixed when scrolling */
+    background-position: center center;
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    min-height: 100vh; /* Full viewport height */
+}
+
+/* Style the header */
+header {
+    background-color: #333; /* Dark background for the header */
+    padding: 1em 0;
+    color: white; /* White text for contrast */
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+}
+
+/* Navigation menu styles */
+nav ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: center;
+}
+
+nav ul li {
+    display: inline;
+    margin: 0 15px;
+}
+
+nav a {
+    text-decoration: none;
+    color: white; /* White text links for contrast */
+    font-weight: bold;
+}
+
+/* Main content area */
+main {
+    max-width: 1200px; /* Set a max width for the content */
+    margin: 2em auto; /* Center the content with a margin */
+    padding: 0 1em; /* Add some padding on the sides */
+    flex: 1; /* Grow to fill available space */
+}
+
+main > section:first-child {
+    padding: 1rem; /* Same as grid-container padding for alignment */
+}
+
+.image-and-details-container {
+    text-align: center; /* Center the content */
+    max-width: 100%;
+}
+
+.detail-img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto; /* This will center the image */
+}
+
+.recipe-details {
+    display: flex;
+    justify-content: space-around; /* This will space out the details evenly */
+}
+
+.preserve-breaks {
+    white-space: pre-line; /* This will preserve line breaks but not additional spaces */
+}
+
+.transparent-background {
+    background-color: rgba(255, 255, 255, 0.8); /* white with 80% opacity */
+    padding: 1em; /* Add some padding around the text */
+    margin-top: 1em; /* Space between sections */
+}
+
+/* Style the recipe card grid */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(150px, 1fr));
+    gap: 1em;
+    padding: 1em;
+    min-height: 1000px;
+    align-items: start;
+    width: 100%; /* Set width to 100% */
+    margin: 0 auto; /* Center the grid container if needed */
+    box-sizing: border-box;
+}
+
+.recipe-card {
+    display: flex;
+    flex-direction: column; /* Stack children vertically */
+    justify-content: space-between; /* Space content evenly */
+    background: rgb(223, 225, 216);
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.recipe-card:hover {
+    transform: scale(1.02); /* Slight zoom effect on hover */
+}
+
+.recipe-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.recipe-card-content {
+    padding: 1em;
+    flex: 1;
+}
+
+/* Remove underline and standardize color for links */
+.recipe-card a, .recipe-card a:visited, .recipe-card a:hover, .recipe-card a:active {
+    text-decoration: none; /* Removes underline from the link */
+    color: inherit; /* Keeps the text color consistent */
+}
+
+/* Styling for the title (h3) */
+.recipe-card .recipe-card-content h3 {
+    font-size: 1.2em; /* Larger font size */
+    font-weight: bold; /* Bold font */
+    margin-bottom: 0em; /* Spacing below the title */
+    color: #333; /* Darker color for prominence */
+}
+
+/* Styling for the cooked times (p) */
+.recipe-card .recipe-card-content p {
+    font-size: 0.9em; /* Smaller font size */
+    font-style: italic; /* Italicize the text */
+    color: #666; /* Lighter color */
+    margin-top: 0;
+}
+
+/* Hover effects for the recipe card */
+.recipe-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
+    transform: translateY(-2px); /* Slight lift effect */
+    transition: box-shadow 0.3s, transform 0.3s; /* Smooth transition for hover effects */
+}
+
+.recipe-card-title {
+    font-size: 1.2em;
+    color: #333;
+    margin: 0;
+    height: 4.5em; /* Set a fixed height */
+    overflow: hidden; /* Hide overflow */
+}
+
+/* Remove hyperlink styling from titles */
+.recipe-card-title a {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit the color from the parent */
+}
+
+.delete-button {
+    margin-top: auto; /* Push the button to the bottom */
+    width: 100%; /* Make the button as wide as the card */
+    border: none;
+    padding: 10px;
+    border-radius: 0 0 10px 10px; /* Continue the card's border-radius */
+    background-color: #a3ac5e;
+    color: rgb(2, 2, 2);
+    cursor: pointer;
+    text-align: center; /* Center the text in the button */
+}
+
+.delete-button:hover {
+    background-color: #e82c20; /* A darker red on hover */
+}
+
+/* Add this to ensure the button doesn't shrink */
+.delete-button-container {
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Stack children vertically */
+}
+
+/* Style the footer */
+footer {
+    background-color: #333; /* Dark background for the footer */
+    color: white; /* White text for contrast */
+    text-align: center;
+    padding: 1em 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Style the form section */
+section {
+    text-align: left; /* Center align the form content */
+    margin: 20px 0; /* Add some vertical margin */
+}
+
+/* Style the input field */
+input[type="text"] {
+    width: 70%; /* Adjust width as needed */
+    padding: 10px; /* Padding for better text visibility */
+    margin: 10px 0; /* Margin for spacing */
+    border: 1px solid #ddd; /* Light border */
+    border-radius: 4px; /* Slightly rounded corners */
+}
+
+/* Style the submit button */
+button {
+    padding: 10px 20px; /* Padding for better button size */
+    background-color: #4CAF50; /* Green background color */
+    color: white; /* White text color */
+    border: none; /* No border */
+    border-radius: 4px; /* Slightly rounded corners */
+    cursor: pointer; /* Cursor changes to pointer on hover */
+    transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+button:hover {
+    background-color: #45a049; /* Darker shade of green on hover */
+}
+
+/* Additional styles for responsive design */
+@media (max-width: 600px) {
+    input[type="text"] {
+        width: 90%; /* Full width on smaller screens */
+    }
+}
