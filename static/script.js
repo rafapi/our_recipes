@@ -38,13 +38,12 @@ function displayRecipe(recipe) {
     recipeCard.className = 'recipe-card';
     recipeCard.id = 'recipe-' + recipe.id;
 
-    // Assuming '/recipe-detail/' is the route to the detail view for a recipe
     var recipeLink = `/recipes/${recipe.id}`;
 
     // Set the innerHTML of the card
     recipeCard.innerHTML = `
         <a href="${recipeLink}" class="recipe-card-link">
-            <img src="${recipe.image_url}" alt="${recipe.title}">
+            <img src="${recipe.image}" alt="${recipe.title}">
             <div class="recipe-card-content">
                 <h3 class="recipe-card-title">${recipe.title}</h3>
                 <p id="times-cooked-${recipe.id}">Cooked ${recipe.times_cooked} times</p>
@@ -93,6 +92,7 @@ function saveRecipeToServer(recipe) {
                 id: data.id,
                 image_url: data.image_url
             };
+            console.log("New Recipe Data:", newRecipeData);
             // Display the new recipe card
             displayRecipe(newRecipeData);
         }
