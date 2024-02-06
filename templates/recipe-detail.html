@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ recipe.title }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='images/favicon.ico') }}">
 </head>
 <body>
     <header>
@@ -20,7 +20,7 @@
 
     <main>
         <div class="image-and-details-container">
-            <img class="detail-img" src="/image/{{ recipe.id }}" alt="Recipe Image" style="max-width: 100%; height: auto;">
+            <img class="detail-img" style="max-width: 100%; height: auto;" src="{{ recipe.image }}">
             <section class="transparent-background">
                 <div class="recipe-details">
                     <span>Serves: {{ recipe.yields }}</span>
@@ -44,7 +44,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2024 My Recipe Collection</p>
+        <p>&copy; 2024 Our Recipe Collection</p>
     </footer>
 </body>
 </html>
