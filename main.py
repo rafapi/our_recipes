@@ -1,4 +1,5 @@
 import logging
+import re
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Optional
@@ -6,7 +7,6 @@ from typing import Optional
 import httpx
 from decouple import config
 from fastapi import FastAPI, HTTPException, Query, Request, status
-from fastapi.encoders import jsonable_encoder
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -16,11 +16,36 @@ from storage3.utils import StorageException
 from supabase._async.client import AsyncClient as Client
 from supabase._async.client import create_client
 
+from model_inference import TogetherEvalModel
+
 logger = logging.getLogger(__name__)
 
 url: str = config("SUPABASE_URL")  # type: ignore
 key: str = config("SUPABASE_KEY")  # type: ignore
 supabase: Client | None = None
+
+
+prompt = """
+I have a recipe and I need to classify it based on its ingredients.
+The categories to choose from are vegetarian, pescatarian, dessert, and starter.
+Here are the title and the ingredients of the recipe:
+
+Title:
+{title}
+
+Ingredients:
+{ingredients}
+
+Given these ingredients, determine which category the recipe falls into. Remember:
+
+* Vegetarian dishes contain no meat or fish.
+* Pescatarian dishes include fish but no other meat.
+* Dessert is a sweet course.
+* Starter is a light dish before the main course.
+
+Please, output only the category name as a single word.
+Answer:
+"""
 
 
 async def init_super_client() -> None:
@@ -61,12 +86,6 @@ async def create_supabase() -> Client:
     return await create_client(url, key)
 
 
-# try:
-#     user = supabase.auth.sign_in_with_password({"email": config("RAFA"), "password": config("RAFA_PASSWORD")})  # type: ignore
-# except Exception:
-#     print("Login failed.")
-
-
 class RecipeData(BaseModel):
     title: str
     image: str
@@ -75,12 +94,7 @@ class RecipeData(BaseModel):
     cook_time: str = ""
     ingredients: list[str]
     instructions: str
-
-
-class RecipeModel(BaseModel):
-    tile: str
-    ingredients: str
-    instructions: str
+    category: str
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -99,16 +113,28 @@ async def fetch_recipe(url: Optional[str] = Query(None, alias="url")):
         raise HTTPException(status_code=400, detail="URL parameter is missing")
 
     try:
+        together_model = TogetherEvalModel(together_api_key=config("TOGETHER_KEY"))
+    except Exception as e:
+        raise Exception(e)
+
+    try:
         data = scrape_me(url, wild_mode=True)
         scraper = data.to_json()
+        title = scraper.get("title", "")
+        ingredients = scraper.get("ingredients", "")
+        recipe_prompt = prompt.format(title=title, ingredients=", ".join(ingredients))
+        result = together_model.eval(prompt=recipe_prompt, num_tokens=16)
+        category = result.strip().split("\n")[-1].capitalize()
+        logger.info(f"Category: {category}")
         recipe = {
-            "title": scraper.get("title", ""),
+            "title": title,
             "image": scraper.get("image", ""),
             "yields": scraper.get("yields", "Not available"),
             "prep_time": scraper.get("prep_time", "Not available"),
             "cook_time": scraper.get("cook_time", "Not available"),
-            "ingredients": scraper.get("ingredients", ""),
+            "ingredients": ingredients,
             "instructions": scraper.get("instructions", ""),
+            "category": category,
         }
         return JSONResponse(content=recipe)
     except Exception as e:
@@ -118,7 +144,7 @@ async def fetch_recipe(url: Optional[str] = Query(None, alias="url")):
 @app.post("/save-recipe", status_code=status.HTTP_201_CREATED)
 async def save_recipe(recipe_data: RecipeData):
     # Check if a recipe with the same title already exists
-    existing_recipe = await supabase.table("Recipes").select("title").eq("title", recipe_data.title).single().execute()
+    existing_recipe = await supabase.table("Recipes").select("title").eq("title", recipe_data.title).execute()
     if existing_recipe.data:
         raise HTTPException(status_code=400, detail="Recipe already exists")
 
@@ -140,7 +166,12 @@ async def save_recipe(recipe_data: RecipeData):
             else:
                 raise e
 
-        image_url = await supabase.storage.from_("images").get_public_url(recipe_data.title)
+        # image_url = await supabase.storage.from_("images").get_public_url(recipe_data.title)
+        signed_url = await supabase.storage.from_("images").create_signed_url(
+            path=recipe_data.title, expires_in=int(3.154e8)
+        )
+        image_url = signed_url["signedURL"]
+        # print(image_url)
 
     try:
         response = (
@@ -154,6 +185,7 @@ async def save_recipe(recipe_data: RecipeData):
                     "ingredients": ingredients,
                     "instructions": recipe_data.instructions,
                     "image": image_url,
+                    "category": recipe_data.category,
                 }
             )
             .execute()  # type: ignore
