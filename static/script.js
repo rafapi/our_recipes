@@ -25,6 +25,13 @@ function fetchRecipe(url) {
         .catch(error => console.error('Error:', error));
 }
 
+const categoryColors = {
+    "Vegetarian": "#658b63",
+    "Pescatarian": "#e97451",
+    "Dessert": "#dfbc64",
+    "Starters": "#9dc3e6",
+};
+
 function displayRecipe(recipe) {
     if (document.getElementById('recipe-' + recipe.id)) {
         // If the recipe card already exists, don't create another one
@@ -37,6 +44,10 @@ function displayRecipe(recipe) {
     var recipeCard = document.createElement('div');
     recipeCard.className = 'recipe-card';
     recipeCard.id = 'recipe-' + recipe.id;
+
+    // Set the background color based on the recipe's category
+    var bgColor = categoryColors[recipe.category] || "rgb(223, 225, 216)"; // Default to white if category not found
+    recipeCard.style.backgroundColor = bgColor; // Apply the background color
 
     var recipeLink = `/recipes/${recipe.id}`;
 
