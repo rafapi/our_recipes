@@ -7,7 +7,6 @@ from typing import Optional
 import httpx
 from decouple import config
 from fastapi import FastAPI, HTTPException, Query, Request, status
-from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -79,7 +78,6 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-app.add_middleware(HTTPSRedirectMiddleware)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
