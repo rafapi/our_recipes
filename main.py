@@ -12,6 +12,10 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from recipe_scrapers import scrape_me
+
+# from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request as SRequest
 from storage3.utils import StorageException
 from supabase._async.client import AsyncClient as Client
 from supabase._async.client import create_client
@@ -77,7 +81,18 @@ def create_app() -> FastAPI:
     return app
 
 
+class TrustXForwardedProtoMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: SRequest, call_next):
+        if "x-forwarded-proto" in request.headers:
+            scheme = request.headers["x-forwarded-proto"]
+            request.scope["scheme"] = scheme
+        response = await call_next(request)
+        return response
+
+
 app = create_app()
+# app.add_middleware(HTTPSRedirectMiddleware)
+app.add_middleware(TrustXForwardedProtoMiddleware)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
