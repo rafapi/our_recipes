@@ -201,18 +201,33 @@ footer {
 }
 
 /* Style the form section */
+/* section { */
+    /* text-align: left; Center align the form content */
+    /* margin: 20px 0; Add some vertical margin */
+/* } */
+
 section {
-    text-align: left; /* Center align the form content */
-    margin: 20px 0; /* Add some vertical margin */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center align the form content */
+    width: 100%; /* Ensure the section takes full width */
 }
 
-/* Style the input field */
 input[type="text"] {
     width: 70%; /* Adjust width as needed */
     padding: 10px; /* Padding for better text visibility */
     margin: 10px 0; /* Margin for spacing */
     border: 1px solid #ddd; /* Light border */
     border-radius: 4px; /* Slightly rounded corners */
+}
+
+input[type="text"] {
+    width: calc(100% - 2em); /* Adjust width considering padding */
+    max-width: 600px; /* Ensure it doesn't exceed a max width */
+    padding: 15px; /* Increase padding for mobile usability */
+    margin: 10px 0; /* Maintain vertical spacing */
+    border: 1px solid #ddd; /* Style border */
+    border-radius: 4px; /* Rounded corners for aesthetics */
 }
 
 /* Style the submit button */
@@ -234,5 +249,42 @@ button:hover {
 @media (max-width: 600px) {
     input[type="text"] {
         width: 90%; /* Full width on smaller screens */
+    }
+}
+
+@media (max-width: 768px) {
+    /* Adjust the main container width */
+    main {
+        max-width: 95%; /* Allows some margin on the sides for smaller devices */
+        margin: 1em auto; /* Adjust top and bottom margin */
+        padding: 0.5em; /* Reduce padding */
+    }
+
+    /* Adjust recipe card image height for smaller screens */
+    .recipe-card img {
+        height: 150px; /* Reduce the height on smaller screens */
+    }
+
+    /* Adjust input field and button sizes for better mobile interaction */
+    input[type="text"], button {
+        width: 100%; /* Full width to utilize space */
+        padding: 15px; /* Larger padding for easier interaction */
+        margin-bottom: 1em; /* Ensure enough space between elements */
+    }
+
+    /* Adjust font sizes for readability on smaller screens */
+    .recipe-card .recipe-card-content h3,
+    .recipe-card .recipe-card-content p {
+        font-size: 1em; /* Adjust font size for better readability */
+    }
+
+    /* Ensure the delete button is easily clickable */
+    .delete-button {
+        padding: 12px; /* Increase padding for a larger clickable area */
+    }
+
+    /* Adjust grid layout to a single column for recipe cards */
+    .grid-container {
+        grid-template-columns: 1fr; /* Single column layout */
     }
 }
