@@ -85,8 +85,8 @@ main > section:first-child {
     margin-top: 1em; /* Space between sections */
 }
 
-.transparent-background .ingredients-list,
-.transparent-background .preserve-breaks {
+main .transparent-background .ingredients-list,
+main .transparent-background .preserve-breaks {
     text-align: left;
 }
 
