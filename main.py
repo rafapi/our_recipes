@@ -12,8 +12,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from recipe_scrapers import scrape_me
-
-# from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as SRequest
 from storage3.utils import StorageException
@@ -81,6 +79,10 @@ def create_app() -> FastAPI:
     return app
 
 
+class ScraperException(Exception):
+    pass
+
+
 class TrustXForwardedProtoMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: SRequest, call_next):
         if "x-forwarded-proto" in request.headers:
@@ -91,14 +93,9 @@ class TrustXForwardedProtoMiddleware(BaseHTTPMiddleware):
 
 
 app = create_app()
-# app.add_middleware(HTTPSRedirectMiddleware)
 app.add_middleware(TrustXForwardedProtoMiddleware)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
-
-
-async def create_supabase() -> Client:
-    return await create_client(url, key)
 
 
 class RecipeData(BaseModel):
@@ -129,10 +126,6 @@ async def fetch_recipe(url: Optional[str] = Query(None, alias="url")):
 
     try:
         together_model = TogetherEvalModel(together_api_key=config("TOGETHER_KEY"))
-    except Exception as e:
-        raise Exception(e)
-
-    try:
         data = scrape_me(url, wild_mode=True)
         scraper = data.to_json()
         title = scraper.get("title", "")
@@ -152,12 +145,19 @@ async def fetch_recipe(url: Optional[str] = Query(None, alias="url")):
             "category": category,
         }
         return JSONResponse(content=recipe)
+
+    except ScraperException as e:
+        raise HTTPException(status_code=500, detail=f"Failed to process recipe: {str(e)}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/save-recipe", status_code=status.HTTP_201_CREATED)
 async def save_recipe(recipe_data: RecipeData):
+    if supabase is None:
+        logger.error("Supabase client is not initialized.")
+        return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
+
     # Check if a recipe with the same title already exists
     existing_recipe = await supabase.table("Recipes").select("title").eq("title", recipe_data.title).execute()
     if existing_recipe.data:
@@ -221,18 +221,28 @@ async def save_recipe(recipe_data: RecipeData):
 
 @app.get("/get-recipes")
 async def get_recipes():
+    if supabase is None:
+        logger.error("Supabase client is not initialized.")
+        return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
+
     recipes = await supabase.table("Recipes").select("*").execute()
     return JSONResponse(content=recipes.data)
 
 
 @app.delete("/delete-recipe/{id}")
 async def delete_recipe(id: int):
+    if supabase is None:
+        logger.error("Supabase client is not initialized.")
+        return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
     await supabase.table("Recipes").delete().eq("id", id).execute()
     return JSONResponse(content={"message": "Recipe deleted successfully"}, status_code=200)
 
 
 @app.post("/increment-cooked/{id}")
 async def increment_cooked(id: int):
+    if supabase is None:
+        logger.error("Supabase client is not initialized.")
+        return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
     recipe = await supabase.table("Recipes").select("times_cooked").eq("id", id).execute()
     new_times_cooked = (recipe.data[0]["times_cooked"] or 0) + 1
     await supabase.table("Recipes").update({"times_cooked": new_times_cooked}).eq("id", id).execute()
@@ -241,6 +251,9 @@ async def increment_cooked(id: int):
 
 @app.get("/recipes/{id}", response_class=HTMLResponse)
 async def recipe_detail(request: Request, id: int):
+    if supabase is None:
+        logger.error("Supabase client is not initialized.")
+        return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
     recipe = await supabase.table("Recipes").select("*").eq("id", id).execute()
     recipe = recipe.data[0]
     ingredients_list = recipe["ingredients"].split(",")  # Split the string into a list
