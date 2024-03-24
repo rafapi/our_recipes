@@ -59,7 +59,7 @@ main > section:first-child {
 }
 
 .image-and-details-container {
-    text-align: left; /* Center the content */
+    text-align: center; /* Center the content */
     max-width: 100%;
 }
 
@@ -83,6 +83,7 @@ main > section:first-child {
     background-color: rgba(255, 255, 255, 0.8); /* white with 80% opacity */
     padding: 1em; /* Add some padding around the text */
     margin-top: 1em; /* Space between sections */
+    text-align: left; /* Align text to the left */
 }
 
 /* Style the recipe card grid */
