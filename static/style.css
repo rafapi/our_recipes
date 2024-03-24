@@ -85,11 +85,6 @@ main > section:first-child {
     margin-top: 1em; /* Space between sections */
 }
 
-main .transparent-background .ingredients-list,
-main .transparent-background .preserve-breaks {
-    text-align: left;
-}
-
 /* Style the recipe card grid */
 .grid-container {
     display: grid;
