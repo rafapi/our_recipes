@@ -59,7 +59,7 @@ main > section:first-child {
 }
 
 .image-and-details-container {
-    text-align: center; /* Center the content */
+    text-align: left;
     max-width: 100%;
 }
 
