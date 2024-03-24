@@ -77,6 +77,7 @@ main > section:first-child {
 
 .preserve-breaks {
     white-space: pre-line; /* This will preserve line breaks but not additional spaces */
+    text-align: left !important;
 }
 
 .transparent-background {
