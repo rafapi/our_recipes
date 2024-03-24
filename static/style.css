@@ -83,7 +83,11 @@ main > section:first-child {
     background-color: rgba(255, 255, 255, 0.8); /* white with 80% opacity */
     padding: 1em; /* Add some padding around the text */
     margin-top: 1em; /* Space between sections */
-    text-align: left !important; /* Align text to the left */
+}
+
+.transparent-background .ingredients-list,
+.transparent-background .preserve-breaks {
+    text-align: left;
 }
 
 /* Style the recipe card grid */
