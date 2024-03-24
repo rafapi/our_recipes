@@ -167,6 +167,10 @@ main > section:first-child {
     color: inherit; /* Inherit the color from the parent */
 }
 
+.ingredients-list {
+    text-align: left;
+}
+
 .delete-button {
     margin-top: auto; /* Push the button to the bottom */
     width: 100%; /* Make the button as wide as the card */
