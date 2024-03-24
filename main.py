@@ -1,13 +1,15 @@
 import logging
 import re
+import secrets
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Optional
 
 import httpx
 from decouple import config
-from fastapi import FastAPI, HTTPException, Query, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
 from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -26,6 +28,7 @@ url: str = config("SUPABASE_URL")  # type: ignore
 key: str = config("SUPABASE_KEY")  # type: ignore
 supabase: Client | None = None
 
+security = HTTPBasic()
 
 prompt = """
 I have a recipe and I need to classify it based on its ingredients.
@@ -54,7 +57,10 @@ async def init_super_client() -> None:
     """for validation access_token init at life span event"""
     global supabase
     supabase = await create_client(url, key)
-    user_credentials = {"email": config("RAFA_EMAIL"), "password": config("RAFA_PASSWORD")}
+    user_credentials = {
+        "email": config("RAFA_EMAIL"),
+        "password": config("RAFA_PASSWORD"),
+    }
     await supabase.auth.sign_in_with_password(
         {"email": user_credentials["email"], "password": user_credentials["password"]}  # type: ignore
     )
@@ -81,6 +87,22 @@ def create_app() -> FastAPI:
 
 class ScraperException(Exception):
     pass
+
+
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(
+        credentials.username, config("AUTH_USER_EMAIL")
+    )
+    correct_password = secrets.compare_digest(
+        credentials.password, config("AUTH_USER_PASSWORD")
+    )
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
 
 
 class TrustXForwardedProtoMiddleware(BaseHTTPMiddleware):
@@ -112,6 +134,11 @@ class RecipeData(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     return templates.TemplateResponse(name="index.html", request=request)
+
+
+@app.post("/auth/login")
+def login(username: str = Depends(get_current_username)):
+    return {"message": f"Hello, {username}!"}
 
 
 @app.get("/recipes", response_class=HTMLResponse)
@@ -147,7 +174,9 @@ async def fetch_recipe(url: Optional[str] = Query(None, alias="url")):
         return JSONResponse(content=recipe)
 
     except ScraperException as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process recipe: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to process recipe: {str(e)}"
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -159,7 +188,12 @@ async def save_recipe(recipe_data: RecipeData):
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
 
     # Check if a recipe with the same title already exists
-    existing_recipe = await supabase.table("Recipes").select("title").eq("title", recipe_data.title).execute()
+    existing_recipe = (
+        await supabase.table("Recipes")
+        .select("title")
+        .eq("title", recipe_data.title)
+        .execute()
+    )
     if existing_recipe.data:
         raise HTTPException(status_code=400, detail="Recipe already exists")
 
@@ -174,10 +208,14 @@ async def save_recipe(recipe_data: RecipeData):
 
         # Check if the image is already present
         try:
-            await supabase.storage.from_("images").upload(recipe_data.title, image_content)
+            await supabase.storage.from_("images").upload(
+                recipe_data.title, image_content
+            )
         except StorageException as e:
             if e.args[0].get("message") == "The resource already exists":
-                logger.info(f"Image already exists, skipping upload: {recipe_data.title}")
+                logger.info(
+                    f"Image already exists, skipping upload: {recipe_data.title}"
+                )
             else:
                 raise e
 
@@ -235,7 +273,9 @@ async def delete_recipe(id: int):
         logger.error("Supabase client is not initialized.")
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
     await supabase.table("Recipes").delete().eq("id", id).execute()
-    return JSONResponse(content={"message": "Recipe deleted successfully"}, status_code=200)
+    return JSONResponse(
+        content={"message": "Recipe deleted successfully"}, status_code=200
+    )
 
 
 @app.post("/increment-cooked/{id}")
@@ -243,9 +283,13 @@ async def increment_cooked(id: int):
     if supabase is None:
         logger.error("Supabase client is not initialized.")
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
-    recipe = await supabase.table("Recipes").select("times_cooked").eq("id", id).execute()
+    recipe = (
+        await supabase.table("Recipes").select("times_cooked").eq("id", id).execute()
+    )
     new_times_cooked = (recipe.data[0]["times_cooked"] or 0) + 1
-    await supabase.table("Recipes").update({"times_cooked": new_times_cooked}).eq("id", id).execute()
+    await supabase.table("Recipes").update({"times_cooked": new_times_cooked}).eq(
+        "id", id
+    ).execute()
     return JSONResponse(content={"success": True, "times_cooked": new_times_cooked})
 
 
@@ -259,8 +303,13 @@ async def recipe_detail(request: Request, id: int):
     ingredients_list = recipe["ingredients"].split(",")  # Split the string into a list
     recipe["instructions"] = ".\n".join(recipe["instructions"].split("."))
     recipe["yields"] = recipe["yields"] if recipe["yields"] else "Not Available"
-    recipe["prep_time"] = recipe["prep_time"] if recipe["prep_time"] else "Not Available"
-    recipe["cook_time"] = recipe["cook_time"] if recipe["cook_time"] else "Not Available"
+    recipe["prep_time"] = (
+        recipe["prep_time"] if recipe["prep_time"] else "Not Available"
+    )
+    recipe["cook_time"] = (
+        recipe["cook_time"] if recipe["cook_time"] else "Not Available"
+    )
     return templates.TemplateResponse(
-        "recipe-detail.html", {"request": request, "recipe": recipe, "ingredients": ingredients_list}
+        "recipe-detail.html",
+        {"request": request, "recipe": recipe, "ingredients": ingredients_list},
     )
