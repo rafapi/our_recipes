@@ -168,7 +168,7 @@ main > section:first-child {
 }
 
 .ingredients-list {
-    text-align: left;
+    text-align: left !important;
 }
 
 .delete-button {
