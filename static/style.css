@@ -214,8 +214,12 @@ footer {
 section {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Center align the form content */
+    align-items: flex-start; /* Center align the form content */
     width: 100%; /* Ensure the section takes full width */
+}
+
+.centered-section {
+    align-items: center; /* Only center align the content of sections with this class */
 }
 
 input[type="text"] {
