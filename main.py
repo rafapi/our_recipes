@@ -132,7 +132,7 @@ class RecipeData(BaseModel):
 
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+async def home(request: Request, username: str = Depends(get_current_username)):
     return templates.TemplateResponse(name="index.html", request=request)
 
 
