@@ -262,7 +262,7 @@ async def save_recipe(
 
 
 @app.get("/get-recipes")
-async def get_recipes():
+async def get_recipes(username: str = Depends(get_current_username)):
     if supabase is None:
         logger.error("Supabase client is not initialized.")
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
