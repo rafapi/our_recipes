@@ -133,17 +133,16 @@ class RecipeData(BaseModel):
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request, username: str = Depends(get_current_username)):
-    return templates.TemplateResponse(name="index.html", request=request)
-
-
-@app.post("/auth/login")
-def login(username: str = Depends(get_current_username)):
-    return {"message": f"Hello, {username}!"}
+    return templates.TemplateResponse(
+        name="index.html", context={"request": request, "username": username}
+    )
 
 
 @app.get("/recipes", response_class=HTMLResponse)
-async def recipes(request: Request):
-    return templates.TemplateResponse(name="recipes.html", request=request)
+async def recipes(request: Request, username: str = Depends(get_current_username)):
+    return templates.TemplateResponse(
+        name="recipes.html", context={"request": request, "username": username}
+    )
 
 
 @app.get("/fetch-recipe")
