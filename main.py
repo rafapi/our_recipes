@@ -146,7 +146,10 @@ async def recipes(request: Request, username: str = Depends(get_current_username
 
 
 @app.get("/fetch-recipe")
-async def fetch_recipe(url: Optional[str] = Query(None, alias="url")):
+async def fetch_recipe(
+    url: Optional[str] = Query(None, alias="url"),
+    username: str = Depends(get_current_username),
+):
     if not url:
         raise HTTPException(status_code=400, detail="URL parameter is missing")
 
@@ -181,7 +184,9 @@ async def fetch_recipe(url: Optional[str] = Query(None, alias="url")):
 
 
 @app.post("/save-recipe", status_code=status.HTTP_201_CREATED)
-async def save_recipe(recipe_data: RecipeData):
+async def save_recipe(
+    recipe_data: RecipeData, username: str = Depends(get_current_username)
+):
     if supabase is None:
         logger.error("Supabase client is not initialized.")
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
@@ -267,7 +272,7 @@ async def get_recipes():
 
 
 @app.delete("/delete-recipe/{id}")
-async def delete_recipe(id: int):
+async def delete_recipe(id: int, username: str = Depends(get_current_username)):
     if supabase is None:
         logger.error("Supabase client is not initialized.")
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
@@ -278,7 +283,7 @@ async def delete_recipe(id: int):
 
 
 @app.post("/increment-cooked/{id}")
-async def increment_cooked(id: int):
+async def increment_cooked(id: int, username: str = Depends(get_current_username)):
     if supabase is None:
         logger.error("Supabase client is not initialized.")
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
@@ -293,7 +298,9 @@ async def increment_cooked(id: int):
 
 
 @app.get("/recipes/{id}", response_class=HTMLResponse)
-async def recipe_detail(request: Request, id: int):
+async def recipe_detail(
+    request: Request, id: int, username: str = Depends(get_current_username)
+):
     if supabase is None:
         logger.error("Supabase client is not initialized.")
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
