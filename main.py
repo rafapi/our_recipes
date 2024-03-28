@@ -91,11 +91,11 @@ class ScraperException(Exception):
 
 def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
     correct_username = secrets.compare_digest(
-        credentials.username, config("AUTH_USER_EMAIL")
-    )
+        credentials.username, config("AUTH_USER_EMAIL")  # type: ignore
+    )  # type: ignore
     correct_password = secrets.compare_digest(
-        credentials.password, config("AUTH_USER_PASSWORD")
-    )
+        credentials.password, config("AUTH_USER_PASSWORD")  # type: ignore
+    )  # type: ignore
     if not (correct_username and correct_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -129,6 +129,7 @@ class RecipeData(BaseModel):
     ingredients: list[str]
     instructions: str
     category: str
+    url: str
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -158,6 +159,7 @@ async def fetch_recipe(
         data = scrape_me(url, wild_mode=True)
         scraper = data.to_json()
         title = scraper.get("title", "")
+        url = scraper.get("canonical_url", "")
         ingredients = scraper.get("ingredients", "")
         recipe_prompt = prompt.format(title=title, ingredients=", ".join(ingredients))
         result = together_model.eval(prompt=recipe_prompt, num_tokens=16)
@@ -172,6 +174,7 @@ async def fetch_recipe(
             "ingredients": ingredients,
             "instructions": scraper.get("instructions", ""),
             "category": category,
+            "url": url,
         }
         return JSONResponse(content=recipe)
 
@@ -243,6 +246,7 @@ async def save_recipe(
                     "instructions": recipe_data.instructions,
                     "image": image_url,
                     "category": recipe_data.category,
+                    "url": recipe_data.url,
                 }
             )
             .execute()  # type: ignore
@@ -267,7 +271,12 @@ async def get_recipes(username: str = Depends(get_current_username)):
         logger.error("Supabase client is not initialized.")
         return JSONResponse(content={"error": "Service is not ready"}, status_code=503)
 
-    recipes = await supabase.table("Recipes").select("*").execute()
+    recipes = (
+        await supabase.table("Recipes")
+        .select("*")
+        .order("times_cooked", desc=True)
+        .execute()
+    )
     return JSONResponse(content=recipes.data)
 
 
