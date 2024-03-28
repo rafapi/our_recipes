@@ -12,7 +12,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 from recipe_scrapers import scrape_me
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request as SRequest
@@ -122,14 +122,14 @@ templates = Jinja2Templates(directory="templates")
 
 class RecipeData(BaseModel):
     title: str
-    image: str
-    yields: str = ""
-    prep_time: str = ""
-    cook_time: str = ""
+    image: HttpUrl
+    yields: str
+    prep_time: str
+    cook_time: str
     ingredients: list[str]
     instructions: str
     category: str
-    url: str
+    url: HttpUrl
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -168,9 +168,9 @@ async def fetch_recipe(
         recipe = {
             "title": title,
             "image": scraper.get("image", ""),
-            "yields": scraper.get("yields", "Not available"),
-            "prep_time": scraper.get("prep_time", "Not available"),
-            "cook_time": scraper.get("cook_time", "Not available"),
+            "yields": str(scraper.get("yields", "Not available")),
+            "prep_time": str(scraper.get("prep_time", "Not available")),
+            "cook_time": str(scraper.get("cook_time", "Not available")),
             "ingredients": ingredients,
             "instructions": scraper.get("instructions", ""),
             "category": category,
@@ -205,7 +205,7 @@ async def save_recipe(
         raise HTTPException(status_code=400, detail="Recipe already exists")
 
     ingredients = ", ".join(recipe_data.ingredients)
-    remote_image_url = recipe_data.image
+    remote_image_url = str(recipe_data.image)
     image_url = None
 
     if remote_image_url:
@@ -246,7 +246,7 @@ async def save_recipe(
                     "instructions": recipe_data.instructions,
                     "image": image_url,
                     "category": recipe_data.category,
-                    "url": recipe_data.url,
+                    "url": str(recipe_data.url),
                 }
             )
             .execute()  # type: ignore
