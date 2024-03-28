@@ -105,6 +105,12 @@ def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
     return credentials.username
 
 
+def sanitize_for_storage(text: str) -> str:
+    text = text.replace("’", "'")
+    text = re.sub(r"[^a-zA-Z0-9 \-']", "", text)
+    text = text[0].upper() + text[1:]
+    return text
+
 class TrustXForwardedProtoMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: SRequest, call_next):
         if "x-forwarded-proto" in request.headers:
@@ -205,6 +211,7 @@ async def save_recipe(
         raise HTTPException(status_code=400, detail="Recipe already exists")
 
     ingredients = ", ".join(recipe_data.ingredients)
+    title = sanitize_for_storage(recipe_data.title)
     remote_image_url = str(recipe_data.image)
     image_url = None
 
@@ -216,19 +223,19 @@ async def save_recipe(
         # Check if the image is already present
         try:
             await supabase.storage.from_("images").upload(
-                recipe_data.title, image_content
+                title, image_content
             )
         except StorageException as e:
             if e.args[0].get("message") == "The resource already exists":
                 logger.info(
-                    f"Image already exists, skipping upload: {recipe_data.title}"
+                    f"Image already exists, skipping upload: {title}"
                 )
             else:
                 raise e
 
         # image_url = await supabase.storage.from_("images").get_public_url(recipe_data.title)
         signed_url = await supabase.storage.from_("images").create_signed_url(
-            path=recipe_data.title, expires_in=int(3.154e8)
+            path=title, expires_in=int(3.154e8)
         )
         image_url = signed_url["signedURL"]
         # print(image_url)
@@ -238,7 +245,7 @@ async def save_recipe(
             await supabase.table("Recipes")
             .insert(
                 {
-                    "title": recipe_data.title,
+                    "title": title,
                     "yields": recipe_data.yields,
                     "prep_time": recipe_data.prep_time,
                     "cook_time": recipe_data.cook_time,
