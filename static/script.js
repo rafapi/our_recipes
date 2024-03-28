@@ -57,6 +57,7 @@ function displayRecipe(recipe) {
             <img src="${recipe.image}" alt="${recipe.title}">
             <div class="recipe-card-content">
                 <h3 class="recipe-card-title">${recipe.title}</h3>
+                <p>Category: <strong>${recipe.category}</strong></p>
                 <p id="times-cooked-${recipe.id}">Cooked ${recipe.times_cooked} times</p>
                 <br>
             </div>
