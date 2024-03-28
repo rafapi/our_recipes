@@ -201,12 +201,6 @@ footer {
     width: 100%;
 }
 
-/* Style the form section */
-/* section { */
-    /* text-align: left; Center align the form content */
-    /* margin: 20px 0; Add some vertical margin */
-/* } */
-
 main > section {
     display: flex;
     flex-direction: column;
@@ -218,21 +212,13 @@ main > section {
 }
 
 input[type="text"] {
-    width: 70%; /* Adjust width as needed */
+    width: 90% !important; /* Adjust width as needed */
     padding: 10px; /* Padding for better text visibility */
     margin: 10px 0; /* Margin for spacing */
     border: 1px solid #ddd; /* Light border */
     border-radius: 4px; /* Slightly rounded corners */
 }
 
-input[type="text"] {
-    width: calc(100% - 2em); /* Adjust width considering padding */
-    max-width: 600px; /* Ensure it doesn't exceed a max width */
-    padding: 15px; /* Increase padding for mobile usability */
-    margin: 10px 0; /* Maintain vertical spacing */
-    border: 1px solid #ddd; /* Style border */
-    border-radius: 4px; /* Rounded corners for aesthetics */
-}
 
 /* Style the submit button */
 button {
